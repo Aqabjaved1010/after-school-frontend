@@ -98,13 +98,65 @@ const canCheckout = computed(() => {
   return cart.value.length > 0 && isNameValid.value && isPhoneValid.value
 })
 
-function checkout() {
+async function checkout() {
   if (!canCheckout.value) return
-  checkoutMessage.value = 'Order submitted successfully for ' + customerName.value.trim() + '.'
-  customerName.value = ''
-  customerPhone.value = ''
-  cart.value = []
+
+  const name = customerName.value.trim()
+  const phone = customerPhone.value.trim()
+
+  const lessonCounts = {}
+  for (const item of cart.value) {
+    const id = item.id
+    if (!lessonCounts[id]) {
+      lessonCounts[id] = 0
+    }
+    lessonCounts[id]++
+  }
+
+  const items = Object.entries(lessonCounts).map(([lessonId, spaces]) => ({
+    lessonId,
+    spaces
+  }))
+
+  const order = {
+    customerName: name,
+    customerPhone: phone,
+    items
+  }
+
+  try {
+    const res = await fetch('http://localhost:4000/orders', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(order)
+    })
+
+    if (!res.ok) {
+      checkoutMessage.value = 'Failed to submit order.'
+      return
+    }
+
+    for (const item of items) {
+      await fetch(`http://localhost:4000/lessons/${item.lessonId}/spaces`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ change: -item.spaces })
+      })
+    }
+
+    checkoutMessage.value = 'Order submitted successfully for ' + name + '.'
+    customerName.value = ''
+    customerPhone.value = ''
+    cart.value = []
+  } catch (error) {
+    checkoutMessage.value = 'Failed to submit order.'
+  }
 }
+
 </script>
 
 <template>
