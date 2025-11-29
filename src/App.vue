@@ -1,40 +1,70 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 
 const API_BASE_URL = 'https://after-school-backend-r4mc.onrender.com'
 
+// --- UI state ---
 const showCart = ref(false)
-
 const lessons = ref([])
+const searchTerm = ref('')
+const loadingLessons = ref(false)
 
-async function loadLessons() {
+// --- Fetch lessons (base or search) from BACKEND ---
+async function fetchLessons(term = '') {
+  loadingLessons.value = true
   try {
-    const res = await fetch(`${API_BASE_URL}/lessons`)
+    let url = `${API_BASE_URL}/lessons`
+    const q = term.trim()
+
+    // if there is a search term, use /search?q=...
+    if (q !== '') {
+      const encoded = encodeURIComponent(q)
+      url = `${API_BASE_URL}/search?q=${encoded}`
+    }
+
+    const res = await fetch(url)
     const data = await res.json()
+
+    // normalise id so frontend always has lesson.id
     lessons.value = data.map(l => ({
       ...l,
-      id: l._id
+      id: l._id || l.id
     }))
   } catch (err) {
     console.error('Failed to load lessons', err)
+  } finally {
+    loadingLessons.value = false
   }
 }
 
+// initial load (all lessons)
 onMounted(() => {
-  loadLessons()
+  fetchLessons()
 })
 
+// SEARCH BUTTON handler
+async function handleSearchClick() {
+  await fetchLessons(searchTerm.value)
+}
+
+// “SEARCH AS YOU TYPE” – every change in searchTerm goes to backend
+watch(searchTerm, (newValue) => {
+  fetchLessons(newValue)
+})
+
+// ------------------------------------------------------------------
+// CART + SORTING + CHECKOUT (same as before, but uses lessons.value)
+// ------------------------------------------------------------------
 const cart = ref([])
 
 const sortBy = ref('subject')
 const sortOrder = ref('asc')
 
-const searchTerm = ref('')
-
 const customerName = ref('')
 const customerPhone = ref('')
 const checkoutMessage = ref('')
 
+// cart operations
 function addToCart(lesson) {
   if (lesson.spaces > 0) {
     cart.value.push(lesson)
@@ -55,25 +85,9 @@ function removeFromCart(index) {
 
 const cartCount = computed(() => cart.value.length)
 
-const filteredLessons = computed(() => {
-  const term = searchTerm.value.trim().toLowerCase()
-  if (!term) return lessons.value
-  return lessons.value.filter(lesson => {
-    const subject = lesson.subject.toLowerCase()
-    const location = lesson.location.toLowerCase()
-    const price = String(lesson.price).toLowerCase()
-    const spaces = String(lesson.spaces).toLowerCase()
-    return (
-      subject.includes(term) ||
-      location.includes(term) ||
-      price.includes(term) ||
-      spaces.includes(term)
-    )
-  })
-})
-
+// now sorting is applied directly to the lessons coming from backend
 const sortedLessons = computed(() => {
-  const list = [...filteredLessons.value]
+  const list = [...lessons.value]
   list.sort((a, b) => {
     let result = 0
     if (sortBy.value === 'subject' || sortBy.value === 'location') {
@@ -88,6 +102,7 @@ const sortedLessons = computed(() => {
   return list
 })
 
+// validation
 const isNameValid = computed(() => {
   const value = customerName.value.trim()
   if (value.length === 0) return false
@@ -104,6 +119,7 @@ const canCheckout = computed(() => {
   return cart.value.length > 0 && isNameValid.value && isPhoneValid.value
 })
 
+// checkout -> backend
 async function checkout() {
   if (!canCheckout.value) return
 
@@ -165,6 +181,8 @@ async function checkout() {
 </script>
 
 
+
+
 <template>
   <div class="app">
     <header class="app-header">
@@ -184,12 +202,23 @@ async function checkout() {
         <div class="controls-bar">
           <h2>Available Lessons</h2>
           <div class="controls-right">
-            <input
-              class="search-input"
-              type="text"
-              v-model="searchTerm"
-              placeholder="Search lessons..."
-            />
+            <div class="search-wrapper">
+              <input
+                class="search-input"
+                type="text"
+                v-model="searchTerm"
+                placeholder="Search lessons..."
+              />
+              <button
+                type="button"
+                class="search-button"
+                @click="handleSearchClick"
+              >
+                Search
+              </button>
+
+           </div>
+
             <div class="sort-controls">
               <label class="sort-control">
                 <span>Sort by</span>
@@ -383,6 +412,29 @@ async function checkout() {
   min-width: 220px;
   font-size: 0.85rem;
 }
+.search-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.search-button {
+  height: 36px;
+  padding: 0 0.9rem;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 600;
+  background: black;
+  color: white;
+  transition: all 0.2s ease;
+}
+
+.search-button:hover {
+  opacity: 0.9;
+}
+
 
 
 
