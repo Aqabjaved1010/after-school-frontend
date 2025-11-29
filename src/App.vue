@@ -21,6 +21,8 @@ const cart = ref([])
 const sortBy = ref('subject')
 const sortOrder = ref('asc')
 
+const searchTerm = ref('')
+
 const customerName = ref('')
 const customerPhone = ref('')
 const checkoutMessage = ref('')
@@ -45,8 +47,25 @@ function removeFromCart(index) {
 
 const cartCount = computed(() => cart.value.length)
 
+const filteredLessons = computed(() => {
+  const term = searchTerm.value.trim().toLowerCase()
+  if (!term) return lessons.value
+  return lessons.value.filter(lesson => {
+    const subject = lesson.subject.toLowerCase()
+    const location = lesson.location.toLowerCase()
+    const price = String(lesson.price).toLowerCase()
+    const spaces = String(lesson.spaces).toLowerCase()
+    return (
+      subject.includes(term) ||
+      location.includes(term) ||
+      price.includes(term) ||
+      spaces.includes(term)
+    )
+  })
+})
+
 const sortedLessons = computed(() => {
-  const list = [...lessons.value]
+  const list = [...filteredLessons.value]
   list.sort((a, b) => {
     let result = 0
     if (sortBy.value === 'subject' || sortBy.value === 'location') {
@@ -60,6 +79,7 @@ const sortedLessons = computed(() => {
   })
   return list
 })
+
 
 const isNameValid = computed(() => {
   const value = customerName.value.trim()
@@ -104,25 +124,34 @@ function checkout() {
       <section v-if="!showCart" class="lessons-section">
         <div class="controls-bar">
           <h2>Available Lessons</h2>
-          <div class="sort-controls">
-            <label class="sort-control">
-              <span>Sort by</span>
-              <select v-model="sortBy">
-                <option value="subject">Subject</option>
-                <option value="location">Location</option>
-                <option value="price">Price</option>
-                <option value="spaces">Spaces</option>
-              </select>
-            </label>
-            <label class="sort-control">
-              <span>Order</span>
-              <select v-model="sortOrder">
-                <option value="asc">Ascending</option>
-                <option value="desc">Descending</option>
-              </select>
-            </label>
+          <div class="controls-right">
+            <input
+              class="search-input"
+              type="text"
+              v-model="searchTerm"
+              placeholder="Search lessons..."
+            />
+            <div class="sort-controls">
+              <label class="sort-control">
+                <span>Sort by</span>
+                <select v-model="sortBy">
+                  <option value="subject">Subject</option>
+                  <option value="location">Location</option>
+                  <option value="price">Price</option>
+                  <option value="spaces">Spaces</option>
+                </select>
+              </label>
+              <label class="sort-control">
+                <span>Order</span>
+                <select v-model="sortOrder">
+                  <option value="asc">Ascending</option>
+                  <option value="desc">Descending</option>
+                </select>
+              </label>
+            </div>
           </div>
         </div>
+
 
         <div class="lessons-grid">
           <article
@@ -277,6 +306,20 @@ function checkout() {
   border-radius: 0.5rem;
   border: 1px solid #ccc;
 }
+.controls-right {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.search-input {
+  padding: 0.4rem 0.75rem;
+  border-radius: 0.5rem;
+  border: 1px solid #ccc;
+  min-width: 180px;
+}
+
 
 .lessons-grid {
   display: grid;
