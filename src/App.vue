@@ -3,18 +3,19 @@ import { ref, computed } from 'vue'
 
 const showCart = ref(false)
 
-const lessons = ref([
-  { id: 1, subject: 'Maths', location: 'Hendon', price: 100, spaces: 5, icon: '📘' },
-  { id: 2, subject: 'English', location: 'Colindale', price: 90, spaces: 5, icon: '📗' },
-  { id: 3, subject: 'Science', location: 'Brent Cross', price: 110, spaces: 5, icon: '🔬' },
-  { id: 4, subject: 'History', location: 'Golders Green', price: 80, spaces: 5, icon: '📜' },
-  { id: 5, subject: 'Coding', location: 'Hendon', price: 120, spaces: 5, icon: '💻' },
-  { id: 6, subject: 'Art', location: 'Colindale', price: 70, spaces: 5, icon: '🎨' },
-  { id: 7, subject: 'Music', location: 'Brent Cross', price: 95, spaces: 5, icon: '🎵' },
-  { id: 8, subject: 'Drama', location: 'Golders Green', price: 85, spaces: 5, icon: '🎭' },
-  { id: 9, subject: 'Robotics', location: 'Hendon', price: 130, spaces: 5, icon: '🤖' },
-  { id: 10, subject: 'Sports', location: 'Colindale', price: 75, spaces: 5, icon: '🏅' }
-])
+const lessons = ref([])
+
+async function loadLessons() {
+  const res = await fetch('http://localhost:4000/lessons')
+  const data = await res.json()
+  lessons.value = data.map(l => ({
+    ...l,
+    id: l._id
+  }))
+}
+
+loadLessons()
+
 
 const cart = ref([])
 
