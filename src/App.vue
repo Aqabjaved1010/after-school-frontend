@@ -1,20 +1,28 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 
 const showCart = ref(false)
 
 const lessons = ref([])
 
 async function loadLessons() {
-  const res = await fetch('http://localhost:4000/lessons')
-  const data = await res.json()
-  lessons.value = data.map(l => ({
-    ...l,
-    id: l._id
-  }))
+  try {
+    const res = await fetch('https://after-school-backend-r4mc.onrender.com/lessons')
+    const data = await res.json()
+    lessons.value = data.map(l => ({
+      ...l,
+      id: l._id
+    }))
+  } catch (err) {
+    console.error('Failed to load lessons', err)
+  }
 }
 
-loadLessons()
+
+onMounted(() => {
+  loadLessons()
+})
+
 
 
 const cart = ref([])
