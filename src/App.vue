@@ -283,42 +283,48 @@ function checkout() {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.8rem;
   gap: 1rem;
-  flex-wrap: wrap;
 }
+
 
 .sort-controls {
   display: flex;
-  gap: 1rem;
-  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem;
 }
 
 .sort-control {
   display: flex;
   flex-direction: column;
-  font-size: 0.9rem;
+  font-size: 0.75rem;
 }
 
 .sort-control select {
-  margin-top: 0.25rem;
-  padding: 0.3rem 0.5rem;
-  border-radius: 0.5rem;
+  height: 36px;
+  padding: 0 0.6rem;
+  border-radius: 999px;
   border: 1px solid #ccc;
+  font-size: 0.8rem;
 }
+
+
 .controls-right {
   display: flex;
   align-items: center;
-  gap: 1rem;
-  flex-wrap: wrap;
+  gap: 0.8rem;
 }
 
+
 .search-input {
-  padding: 0.4rem 0.75rem;
-  border-radius: 0.5rem;
+  height: 36px;
+  padding: 0 0.75rem;
+  border-radius: 999px;
   border: 1px solid #ccc;
-  min-width: 180px;
+  min-width: 220px;
+  font-size: 0.85rem;
 }
+
 
 
 .lessons-grid {
