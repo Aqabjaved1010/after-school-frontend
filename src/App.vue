@@ -89,10 +89,17 @@ const cartCount = computed(() => cart.value.length)
 }
 
 .cart-toggle {
-  padding: 0.5rem 1rem;
+  padding: 0.6rem 1.2rem;
   border-radius: 999px;
   border: none;
   cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.cart-toggle:hover {
+  background: black;
+  color: white;
 }
 
 .lessons-grid {
@@ -104,10 +111,15 @@ const cartCount = computed(() => cart.value.length)
 .lesson-card {
   padding: 1.5rem;
   border-radius: 1rem;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+  transition: transform 0.2s ease;
+}
+
+.lesson-card:hover {
+  transform: translateY(-4px);
 }
 
 .lesson-icon {
@@ -116,9 +128,25 @@ const cartCount = computed(() => cart.value.length)
 
 .add-button {
   margin-top: 0.75rem;
-  padding: 0.5rem 1rem;
+  padding: 0.6rem 1.2rem;
   border-radius: 999px;
-  border: none;
+  border: 1px solid black;
+  background: white;
+  color: black;
   cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.add-button:hover {
+  background: black;
+  color: white;
+}
+
+.add-button:disabled {
+  background: #ddd;
+  color: #777;
+  border: none;
+  cursor: not-allowed;
 }
 </style>
