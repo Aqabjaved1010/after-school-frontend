@@ -21,6 +21,10 @@ const cart = ref([])
 const sortBy = ref('subject')
 const sortOrder = ref('asc')
 
+const customerName = ref('')
+const customerPhone = ref('')
+const checkoutMessage = ref('')
+
 function addToCart(lesson) {
   if (lesson.spaces > 0) {
     cart.value.push(lesson)
@@ -56,6 +60,30 @@ const sortedLessons = computed(() => {
   })
   return list
 })
+
+const isNameValid = computed(() => {
+  const value = customerName.value.trim()
+  if (value.length === 0) return false
+  return /^[A-Za-z\s]+$/.test(value)
+})
+
+const isPhoneValid = computed(() => {
+  const value = customerPhone.value.trim()
+  if (value.length === 0) return false
+  return /^[0-9]+$/.test(value)
+})
+
+const canCheckout = computed(() => {
+  return cart.value.length > 0 && isNameValid.value && isPhoneValid.value
+})
+
+function checkout() {
+  if (!canCheckout.value) return
+  checkoutMessage.value = 'Order submitted successfully for ' + customerName.value.trim() + '.'
+  customerName.value = ''
+  customerPhone.value = ''
+  cart.value = []
+}
 </script>
 
 <template>
@@ -65,7 +93,7 @@ const sortedLessons = computed(() => {
       <button
         class="cart-toggle"
         @click="showCart = !showCart"
-        :disabled="cartCount === 0"
+        :disabled="cartCount === 0 && !showCart"
       >
         Cart ({{ cartCount }})
       </button>
@@ -136,6 +164,51 @@ const sortedLessons = computed(() => {
             </div>
           </li>
         </ul>
+
+        <div class="checkout-area">
+          <h3>Checkout</h3>
+          <form class="checkout-form" @submit.prevent="checkout">
+            <div class="form-row">
+              <label>
+                Name
+                <input
+                  type="text"
+                  v-model="customerName"
+                  placeholder="Enter your name"
+                />
+              </label>
+              <p v-if="customerName && !isNameValid" class="error-text">
+                Name must contain letters and spaces only.
+              </p>
+            </div>
+
+            <div class="form-row">
+              <label>
+                Phone
+                <input
+                  type="text"
+                  v-model="customerPhone"
+                  placeholder="Enter your phone number"
+                />
+              </label>
+              <p v-if="customerPhone && !isPhoneValid" class="error-text">
+                Phone must contain numbers only.
+              </p>
+            </div>
+
+            <button
+              type="submit"
+              class="checkout-button"
+              :disabled="!canCheckout"
+            >
+              Checkout
+            </button>
+          </form>
+
+          <p v-if="checkoutMessage" class="success-text">
+            {{ checkoutMessage }}
+          </p>
+        </div>
       </section>
     </main>
   </div>
@@ -325,5 +398,66 @@ const sortedLessons = computed(() => {
 .remove-button:hover {
   background: black;
   color: white;
+}
+
+.checkout-area {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #eee;
+}
+
+.checkout-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+
+.form-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.form-row label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.9rem;
+}
+
+.form-row input {
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.5rem;
+  border: 1px solid #ccc;
+}
+
+.checkout-button {
+  align-self: flex-start;
+  padding: 0.6rem 1.4rem;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  background: black;
+  color: white;
+  transition: all 0.2s ease;
+}
+
+.checkout-button:disabled {
+  background: #ddd;
+  color: #777;
+  cursor: not-allowed;
+}
+
+.error-text {
+  font-size: 0.8rem;
+  color: #b00020;
+}
+
+.success-text {
+  margin-top: 1rem;
+  font-size: 0.9rem;
+  color: #0a7a28;
 }
 </style>
