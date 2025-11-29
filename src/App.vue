@@ -90,13 +90,14 @@ function checkout() {
   <div class="app">
     <header class="app-header">
       <h1>After School Classes</h1>
-      <button
-        class="cart-toggle"
-        @click="showCart = !showCart"
-        :disabled="cartCount === 0 && !showCart"
-      >
-        Cart ({{ cartCount }})
-      </button>
+        <button
+          class="cart-toggle"
+          @click="showCart = !showCart"
+          :disabled="!showCart && cartCount === 0"
+>
+           {{ showCart ? 'Back to Lessons' : 'Cart (' + cartCount + ')' }}
+        </button>
+
     </header>
 
     <main>
