@@ -1,13 +1,15 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 
+const API_BASE_URL = 'https://after-school-backend-r4mc.onrender.com'
+
 const showCart = ref(false)
 
 const lessons = ref([])
 
 async function loadLessons() {
   try {
-    const res = await fetch('https://after-school-backend-r4mc.onrender.com/lessons')
+    const res = await fetch(`${API_BASE_URL}/lessons`)
     const data = await res.json()
     lessons.value = data.map(l => ({
       ...l,
@@ -18,12 +20,9 @@ async function loadLessons() {
   }
 }
 
-
 onMounted(() => {
   loadLessons()
 })
-
-
 
 const cart = ref([])
 
@@ -89,7 +88,6 @@ const sortedLessons = computed(() => {
   return list
 })
 
-
 const isNameValid = computed(() => {
   const value = customerName.value.trim()
   if (value.length === 0) return false
@@ -133,7 +131,7 @@ async function checkout() {
   }
 
   try {
-    const res = await fetch('http://localhost:4000/orders', {
+    const res = await fetch(`${API_BASE_URL}/orders`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -147,7 +145,7 @@ async function checkout() {
     }
 
     for (const item of items) {
-      await fetch(`http://localhost:4000/lessons/${item.lessonId}/spaces`, {
+      await fetch(`${API_BASE_URL}/lessons/${item.lessonId}/spaces`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json'
@@ -164,8 +162,8 @@ async function checkout() {
     checkoutMessage.value = 'Failed to submit order.'
   }
 }
-
 </script>
+
 
 <template>
   <div class="app">
